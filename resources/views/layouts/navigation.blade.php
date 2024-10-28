@@ -24,15 +24,20 @@
                         {{ __('Carrito') }}
                         <!-- Mostrar el contador de items en el carrito -->
                         @php
-                            $carrito = session('carrito', []);
-                            $cantidadTotal = array_sum(array_column($carrito, 'cantidad'));
+                        $carrito = session('carrito', []);
+                        $cantidadTotal = array_sum(array_column($carrito, 'cantidad'));
                         @endphp
                         @if($cantidadTotal > 0)
-                            <span class="absolute top-0 right-0 inline-block w-5 h-5 text-center rounded-full bg-red-500 text-white text-xs font-bold">
-                                {{ $cantidadTotal }}
-                            </span>
+                        <span class="absolute top-0 right-0 inline-block w-5 h-5 text-center rounded-full bg-red-500 text-white text-xs font-bold">
+                            {{ $cantidadTotal }}
+                        </span>
                         @endif
                     </x-nav-link>
+
+                    <x-nav-link :href="route('historial')" :active="request()->routeIs('historial')">
+                        {{ __('Historial de Compras') }}
+                    </x-nav-link>
+
                 </div>
             </div>
 
@@ -61,7 +66,7 @@
                             @csrf
 
                             <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
+                                onclick="event.preventDefault();
                                                 this.closest('form').submit();">
                                 {{ __('Cerrar Sesión') }}
                             </x-dropdown-link>
@@ -92,12 +97,12 @@
             <x-responsive-nav-link :href="route('carrito.ver')" :active="request()->routeIs('carrito.ver')" class="relative">
                 {{ __('Carrito') }}
                 @php
-                    $cantidadTotal = array_sum(array_column($carrito, 'cantidad'));
+                $cantidadTotal = array_sum(array_column($carrito, 'cantidad'));
                 @endphp
                 @if($cantidadTotal > 0)
-                    <span class="absolute top-0 right-0 inline-block w-5 h-5 text-center rounded-full bg-red-500 text-white text-xs font-bold">
-                        {{ $cantidadTotal }}
-                    </span>
+                <span class="absolute top-0 right-0 inline-block w-5 h-5 text-center rounded-full bg-red-500 text-white text-xs font-bold">
+                    {{ $cantidadTotal }}
+                </span>
                 @endif
             </x-responsive-nav-link>
         </div>
@@ -119,7 +124,7 @@
                     @csrf
 
                     <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
+                        onclick="event.preventDefault();
                                         this.closest('form').submit();">
                         {{ __('Log Out') }}
                     </x-responsive-nav-link>

@@ -30,8 +30,13 @@ class Compras extends Model
         return $this->belongsTo(Usuarios::class, 'IdUsuario');
     }
 
-    public function detalles()
+    public function detallesCompras()
     {
-        return $this->hasMany(DetallesCompras::class, 'IdCompra');
+        return $this->hasMany(DetallesCompras::class, 'IdCompra', 'IdCompra');
+    }
+
+    public function comprobanteCompra()
+    {
+        return $this->belongsTo(ComprobantesCompras::class, 'IdComprobante', 'IdComprobante');
     }
 }

@@ -14,5 +14,6 @@ class ComprobantesCompras extends Model
         'OrdenCompra',
         'TokenPago',
         'FechaTransaccion',
+        'LinkComprobante',
     ];
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Srmklive\PayPal\Services\PayPal as PayPalClient;
 
@@ -67,6 +68,7 @@ class PayPalController extends Controller
         return redirect()->route('dashboard')->with('error', 'No se pudo crear el pago con PayPal.');
     }
 
+    // Dentro del método capturarPago()
     public function capturarPago(Request $request)
     {
         $paypal = new PayPalClient;
@@ -81,45 +83,59 @@ class PayPalController extends Controller
             $captureId = $response['purchase_units'][0]['payments']['captures'][0]['id'];
             $fechaTransaccion = Carbon::parse($response['purchase_units'][0]['payments']['captures'][0]['create_time'])->format('Y-m-d H:i:s');
 
+            // Obtener el link del comprobante
+            $linkComprobante = '';
+            foreach ($response['purchase_units'][0]['payments']['captures'][0]['links'] as $link) {
+                if ($link['rel'] == 'self') {
+                    $linkComprobante = $link['href'];
+                    break;
+                }
+            }
+
             $comprobante = ComprobantesCompras::create([
                 'OrdenCompra' => $response['id'],
                 'TokenPago' => $captureId,
+                'LinkComprobante' => $linkComprobante,
                 'FechaTransaccion' => $fechaTransaccion,
             ]);
+            $comprobante->save();
 
-            // Actualizar la compra y finalizar
-            $carrito = session()->get('carrito', []);
+            if ($comprobante) {
+                $carrito = session()->get('carrito', []);
 
-            if (!empty($carrito)) {
-                // Crear una nueva compra y asociar el comprobante
-                $compra = Compras::create([
-                    'IdEstadoCompra' => 1,
-                    'IdUsuario' => Auth::id(),
-                    'FechaCompra' => now(),
-                    'TotalCompra' => collect($carrito)->sum(function ($item) {
-                        return $item['cantidad'] * $item['precio_unitario'];
-                    }),
-                    'IdComprobante' => $comprobante->IdComprobante,
-                ]);
-
-                // Crear detalles de la compra
-                foreach ($carrito as $item) {
-                    DetallesCompras::create([
-                        'IdCompra' => $compra->IdCompra,
-                        'IdProducto' => $item['producto']->IdProducto,
-                        'Cantidad' => $item['cantidad'],
-                        'PrecioUnitario' => $item['precio_unitario'],
-                        'SubTotal' => $item['cantidad'] * $item['precio_unitario'],
+                if (!empty($carrito)) {
+                    // Crear una nueva compra y asociar el comprobante
+                    $compra = Compras::create([
+                        'IdEstadoCompra' => 1,
+                        'IdUsuario' => Auth::id(),
+                        'FechaCompra' => now()->format('Y-m-d'), // Asegúrate de dar el formato correcto a la fecha
+                        'TotalCompra' => collect($carrito)->sum(function ($item) {
+                            return $item['cantidad'] * $item['precio_unitario'];
+                        })
                     ]);
 
-                    // Reducir el stock del producto
-                    $item['producto']->decrement('Stock', $item['cantidad']);
+                    $compra->IdComprobante = $comprobante->IdComprobante;
+                    $compra->save();
+
+                    // Crear detalles de la compra
+                    foreach ($carrito as $item) {
+                        DetallesCompras::create([
+                            'IdCompra' => $compra->IdCompra,
+                            'IdProducto' => $item['producto']->IdProducto,
+                            'Cantidad' => $item['cantidad'],
+                            'PrecioUnitario' => $item['precio_unitario'],
+                            'SubTotal' => $item['cantidad'] * $item['precio_unitario'],
+                        ]);
+
+                        // Reducir el stock del producto
+                        $item['producto']->decrement('Stock', $item['cantidad']);
+                    }
+
+                    // Limpiar el carrito
+                    session()->forget('carrito');
+
+                    return redirect()->route('dashboard')->with('success', 'Compra realizada exitosamente.');
                 }
-
-                // Limpiar el carrito
-                session()->forget('carrito');
-
-                return redirect()->route('dashboard')->with('success', 'Compra realizada exitosamente.');
             }
         }
 

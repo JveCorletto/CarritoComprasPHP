@@ -107,5 +107,6 @@ CREATE TABLE ComprobantesCompras(
     IdComprobante BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     OrdenCompra VARCHAR(255) NOT NULL,
     TokenPago VARCHAR(255) NOT NULL,
+    LinkComprobante VARCHAR(500) NOT NULL,
     FechaTransaccion DATETIME NOT NULL
 );

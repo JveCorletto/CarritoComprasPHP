@@ -6,6 +6,7 @@ use App\Http\Controllers\PayPalController;
 use App\Http\Controllers\ComprasController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\InventarioController;
+use App\Http\Controllers\HistorialComprasController;
 
 Route::get('/', function () {
     return view('welcome');
@@ -70,6 +71,19 @@ Route::get('/paypal/cancel', function () {
 Route::get('/compras/finalizar', [ComprasController::class, 'finalizar'])
     ->middleware(['auth', 'verified'])
     ->name('compras.finalizar');
+
+// Historial de Compras
+Route::get('/historial', [HistorialComprasController::class, 'historialCompras'])
+    ->middleware(['auth', 'verified'])
+    ->name('historial');
+
+Route::get('/historial-compras/comprobante/{captureId}', [HistorialComprasController::class, 'obtenerComprobantePaypal'])
+    ->middleware(['auth', 'verified'])
+    ->name('obtenerComprobantePaypal');
+
+Route::get('/paypal/comprobante/{captureId}', [HistorialComprasController::class, 'obtenerComprobantePaypal'])
+    ->middleware(['auth', 'verified'])
+    ->name('paypal.comprobante');
 
 // Configuración del perfil
 Route::middleware('auth')->group(function () {
