@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 
+use App\Http\Controllers\PayPalController;
 use App\Http\Controllers\ComprasController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\InventarioController;
@@ -48,6 +49,23 @@ Route::post('/compras/agregar', [ComprasController::class, 'agregar'])
 Route::get('/carrito', [ComprasController::class, 'verCarrito'])
     ->middleware(['auth', 'verified'])
     ->name('carrito.ver');
+
+Route::get('/paypal/pago', [PayPalController::class, 'crearPago'])
+    ->middleware(['auth', 'verified'])
+    ->name('paypal.crearPago');
+
+Route::get('/paypal/captura', [PayPalController::class, 'capturarPago'])
+    ->middleware(['auth', 'verified'])
+    ->name('paypal.capturarPago');
+
+// Ruta para manejar el éxito del pago
+Route::get('/paypal/success', [PayPalController::class, 'capturarPago'])
+    ->name('paypal.success');
+
+// Ruta para manejar la cancelación del pago
+Route::get('/paypal/cancel', function () {
+    return redirect()->route('dashboard')->with('error', 'El pago fue cancelado.');
+})->name('paypal.cancel');
 
 Route::get('/compras/finalizar', [ComprasController::class, 'finalizar'])
     ->middleware(['auth', 'verified'])

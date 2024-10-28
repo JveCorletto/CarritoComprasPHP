@@ -81,7 +81,7 @@ VALUES  ('Pendiente de pago'),
 CREATE TABLE Compras(
     IdCompra BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
     IdEstadoCompra INT NOT NULL,
-    IdComprobante BIGINT NOT NULL,
+    IdComprobante BIGINT NULL,
     IdUsuario BIGINT NOT NULL,
 
     FechaCompra DATE NOT NULL,
@@ -105,10 +105,7 @@ CREATE TABLE DetallesCompras(
 
 CREATE TABLE ComprobantesCompras(
     IdComprobante BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    IdCompra BIGINT NOT NULL,
-    Tarjeta VARCHAR(15) NOT NULL,
-    TokenComprobante VARCHAR(255) NOT NULL,
-    FechaTransaccion DATETIME NOT NULL,
-
-    CONSTRAINT FK_ComprobantesCompras_Compras FOREIGN KEY (IdCompra) REFERENCES Compras(IdCompra)
+    OrdenCompra VARCHAR(255) NOT NULL,
+    TokenPago VARCHAR(255) NOT NULL,
+    FechaTransaccion DATETIME NOT NULL
 );

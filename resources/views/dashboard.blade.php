@@ -9,13 +9,13 @@
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 @if(session('success'))
-                <div class="mb-4 p-4 text-green-800 bg-green-100 border border-green-200 rounded-md">
+                <div class="mb-4 p-4 border border-green-200 rounded-md" style="color: black; background-color: #a5d6a7;">
                     {{ session('success') }}
                 </div>
                 @endif
 
                 @if(session('error'))
-                <div class="mb-4 p-4 text-red-800 bg-red-100 border border-red-200 rounded-md">
+                <div class="mb-4 p-4 border border-green-200 rounded-md" style="color: white; background-color: #f44336;">
                     {{ session('error') }}
                 </div>
                 @endif
