@@ -1,3 +1,180 @@
+# Documentación del Proyecto: Carrito de Compras con PHP e Integración de Pagos con PayPal
+
+Este es un proyecto de Laravel que implementa un sistema de carrito de compras con la funcionalidad de realizar pagos a través de PayPal. Además, incluye la gestión de compras, productos y comprobantes de compra.
+
+## Requisitos
+
+Para ejecutar este proyecto, necesitas tener instalado:
+
+- PHP >= 8.2
+- Composer
+- MySQL
+- Laravel 8 o superior
+- Una cuenta de desarrollador de PayPal para obtener las credenciales de API (modo sandbox o producción)
+
+## Instalación
+
+1. **Clona el repositorio**:
+
+   ```bash
+   git clone [https://github.com/tu_usuario/tu_proyecto.git](https://github.com/JveCorletto/CarritoComprasPHP.git)
+   cd tu_proyecto
+   ```
+
+2. **Instala las dependencias del proyecto** usando Composer:
+
+   ```bash
+   composer install
+   ```
+
+3. **Configura el archivo `.env`**:
+
+   Copia el archivo de ejemplo `.env.example` y renómbralo a `.env`:
+
+   ```bash
+   cp .env.example .env
+   ```
+
+   Luego, actualiza los siguientes valores:
+
+   - Configuración de la base de datos:
+     ```env
+     DB_DATABASE=nombre_base_datos
+     DB_USERNAME=tu_usuario
+     DB_PASSWORD=tu_contraseña
+     ```
+
+   - Credenciales de PayPal (debes obtenerlas en https://developer.paypal.com/):
+     ```env
+     PAYPAL_CLIENT_ID=tu_client_id
+     PAYPAL_CLIENT_SECRET=tu_client_secret
+     PAYPAL_MODE=sandbox
+     ```
+
+4. **Genera la clave de aplicación de Laravel**:
+
+   ```bash
+   php artisan key:generate
+   ```
+
+5. **Crea la base de datos con el archivo contenido en el repositorio**:
+
+   ```bash
+   ~\CarritoCompras_schema_n_data.sql
+   ```
+
+6. **Migra la base de datos**:
+   Hay tablas que son necesarias para el funcionamiento correcto del sistema que las crea la librería de Blade, crea estas ejecutando las migraciones necesarias.
+
+   ```bash
+   php artisan migrate
+   ```
+
+6. **Configura el almacenamiento de enlaces simbólicos** (para subir imágenes de productos):
+
+   ```bash
+   php artisan storage:link
+   ```
+
+7. **Inicia el servidor local de Laravel**:
+
+   ```bash
+   php artisan serve
+   ```
+
+   El proyecto debería estar corriendo en `http://localhost:8000`.
+
+## Características
+
+- **Carrito de Compras**: Los usuarios pueden agregar productos al carrito y gestionar la cantidad de los productos seleccionados.
+- **Procesamiento de pagos con PayPal**: Se integra la API de PayPal para realizar pagos en línea. Al finalizar la compra, se redirige al usuario a PayPal para completar el pago.
+- **Gestión de Productos**: El administrador puede agregar, editar y eliminar productos desde el panel de administración.
+- **Generación de Comprobantes de Compras**: Al finalizar un pago exitoso, se genera un comprobante que se almacena en la base de datos.
+- **Notificaciones**: El sistema muestra mensajes de éxito o error tras completar una acción (compra, agregar productos, etc.).
+
+## Estructura de Base de Datos
+
+### Tabla `compras`
+
+```sql
+CREATE TABLE Compras (
+    IdCompra BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    IdEstadoCompra INT NOT NULL,
+    IdUsuario BIGINT NOT NULL,
+    FechaCompra DATETIME NOT NULL,
+    TotalCompra DECIMAL(10, 2) NOT NULL,
+    IdComprobante BIGINT,
+    FOREIGN KEY (IdComprobante) REFERENCES ComprobantesCompras(IdComprobante)
+);
+```
+
+### Tabla `detalles_compras`
+
+```sql
+CREATE TABLE DetallesCompras (
+    IdDetalleCompra BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    IdCompra BIGINT NOT NULL,
+    IdProducto BIGINT NOT NULL,
+    Cantidad INT NOT NULL,
+    PrecioUnitario DECIMAL(10, 2) NOT NULL,
+    SubTotal DECIMAL(10, 2) NOT NULL,
+    FOREIGN KEY (IdCompra) REFERENCES Compras(IdCompra),
+    FOREIGN KEY (IdProducto) REFERENCES Productos(IdProducto)
+);
+```
+
+### Tabla `productos`
+
+```sql
+CREATE TABLE Productos (
+    IdProducto BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    Producto VARCHAR(255) NOT NULL,
+    Descripcion TEXT,
+    Precio DECIMAL(10, 2) NOT NULL,
+    Stock INT NOT NULL,
+    Imagen VARCHAR(255)
+);
+```
+
+### Tabla `comprobantes_compras`
+
+```sql
+CREATE TABLE ComprobantesCompras (
+    IdComprobante BIGINT NOT NULL PRIMARY KEY AUTO_INCREMENT,
+    OrdenCompra VARCHAR(255) NOT NULL,
+    TokenPago VARCHAR(255) NOT NULL,
+    FechaTransaccion DATETIME NOT NULL
+);
+```
+
+## Rutas Importantes
+
+### Crear Pago con PayPal
+
+**Ruta**: `POST /paypal/crear-pago`
+
+Este método crea una orden de pago en PayPal. Si el carrito no tiene productos, redirige al usuario al dashboard con un mensaje de error. Si se crea el pago correctamente, redirige a PayPal para completar el pago.
+
+### Capturar Pago
+
+**Ruta**: `GET /paypal/capturar-pago`
+
+Este método se utiliza para capturar el pago después de que el usuario haya sido redirigido de PayPal. Si el pago se completa, se guarda la compra en la base de datos y se genera un comprobante de compra.
+
+### Finalizar Compra
+
+**Ruta**: `POST /compras/finalizar`
+
+Este método se ejecuta al capturar el pago. Almacena los detalles de la compra en la base de datos, reduce el stock de los productos y limpia el carrito.
+
+## Créditos
+
+Este proyecto fue desarrollado por [André] y cuenta con integración de la API de PayPal para el procesamiento de pagos.
+
+## Licencia
+
+Este proyecto está bajo la licencia MIT. Consulta el archivo LICENSE para más detalles.
+
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
 
 <p align="center">
